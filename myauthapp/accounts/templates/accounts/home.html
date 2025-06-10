@@ -1,0 +1,201 @@
+{% extends 'accounts/base.html' %}
+
+{% block title %}Главная{% endblock %}
+{% block header %}Калькулятор Ба Цзы{% endblock %}
+
+{% block content %}
+{% if user.is_authenticated %}
+
+    <p>Сегодня: <strong>{{ current_date }}</strong></p>
+
+    <!-- Форма для даты -->
+    <div class="form-section">
+        <h3>1. Введите дату рождения</h3>
+        <input type="date" id="birthdayInput" required>
+        <button id="submitBirthday">Отправить дату</button>
+        <div id="birthdayResult"></div>
+    </div>
+
+    <div>
+        <table>
+            {{styled_df_b|safe}}
+        </table>
+    </div>
+    
+    <!-- Форма для города (блокируется пока не отправлена дата) -->
+    <div class="form-section">
+        <h3>2. Введите город</h3>
+        <input type="text" id="cityInput" disabled required>
+        <button id="submitCity" disabled>Отправить город</button>
+        <div id="cityResult"></div>
+    </div>
+
+    <div id="finalResults"></div>
+
+    <script>
+    // Обработка даты
+    document.getElementById('submitBirthday').addEventListener('click', async () => {
+        const birthday = document.getElementById('birthdayInput').value;
+        
+        const response = await fetch("{% url 'process_birthday' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ birthday })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            document.getElementById('birthdayResult').innerHTML = `<p style="color:green">${data.birthday_result}</p>`;
+            
+            
+            
+
+
+
+
+
+
+
+
+
+
+            // Активируем форму города
+            document.getElementById('cityInput').disabled = false;
+            document.getElementById('submitCity').disabled = false;
+            
+            // Сохраняем данные для последующих вычислений
+            window.baziData = data.calculated_data;
+        } else {
+            alert('Ошибка: ' + data.error);
+        }
+    });
+
+    // Обработка города
+    document.getElementById('submitCity').addEventListener('click', async () => {
+        const city = document.getElementById('cityInput').value;
+        
+        // Добавляем данные из предыдущего запроса
+        const postData = { 
+            city,
+            ...window.baziData  // Распаковываем сохранённые данные
+        };
+        
+        const response = await fetch("{% url 'process_city' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify(postData)
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            document.getElementById('cityResult').innerHTML = `
+                <p style="color:green">${data.city_result}</p>
+            `;
+            
+            // Показываем финальные результаты
+            document.getElementById('finalResults').innerHTML = `
+                <h3>Итоговые данные:</h3>
+                <p>Дата: ${window.baziData.birthday}</p>
+                <p>Город: ${city}</p>
+                <p>Время: ${data.time_data.solar_time || 'Н/Д'}</p>
+            `;
+        } else {
+            alert('Ошибка: ' + data.error);
+        }
+    });
+    </script>
+
+    <!-- <form for="birthday" method="post">
+        {% csrf_token %}
+        <div style="
+                    display: flex;
+                    align-items: center;  /* Вертикальное центрирование */
+                    justify-content: center;  /* Горизонтальное центрирование */
+                    height: 50px;
+                    border: 0px solid #ddd;
+                ">
+            <label for="birthday" style="font-size: 14px; ">Введите дату рождения:</label>
+            <input type="date" id="birthday" name="birthday" style="text-align: center; 
+                                                                    height: 40px; 
+                                                                    font-size: 16px;" required>
+        </div>
+        <button type="submit">Рассчитать</button>
+        <div id="birthdayResult"></div>
+    </form>
+        
+        {% if birthday %}
+            <div>Выбранная дата рождения: {{ birthday }}</div>
+        {% endif %}        
+    
+    
+
+        
+    <form for="city" method="post">
+        {% csrf_token %}
+        <div style="
+                    display: flex;
+                    align-items: center;  /* Вертикальное центрирование */
+                    justify-content: center;  /* Горизонтальное центрирование */
+                    height: 50px;
+                    border: 0px solid #ddd;
+                ">
+            <label for="city" style="font-size: 14px;" >Введите город, где Вы находитесь:</label>
+            <input type="text" id="city" name="city" list="cities" style="text-align: center; 
+                                                                    height: 40px; 
+                                                                    font-size: 16px;" required>
+            <datalist id="cities">
+               
+            </datalist>
+        </div>
+        <button type="submit">Рассчитать</button>
+        {% if city %}
+            <div>Выбранный город: {{ city }}</div>
+        {% endif %}     
+    </form> -->
+
+        <!-- <div>
+            <label for="our_date">Введите интересующую дату:</label>
+            <input type="date" id="our_date" name="our_date" required>
+        </div>    
+        <button type="submit">Рассчитать</button>
+        {% if our_date %}
+            <div>Выбранная our_date: {{ our_date }}</div>
+        {% endif %}  -->
+
+
+
+
+
+<style>
+.invalid-feedback {
+    color: #dc3545;
+    font-size: 0.875em;
+}
+.is-invalid {
+    border-color: #dc3545 !important;
+}
+</style>
+
+    {% else %}
+    <div style="text-align: center; margin: 30px 0;">
+        <p>Для доступа к системе требуется авторизация</p>
+        <div style="margin-top: 20px;">
+            <a href="{% url 'login' %}" style="display: inline-block; margin: 0 10px;">
+                <button>Войти</button>
+            </a>
+            <a href="{% url 'register' %}" style="display: inline-block; margin: 0 10px;">
+                <button>Регистрация</button>
+            </a>
+        </div>
+    </div>
+{% endif %}
+
+{% endblock %}
