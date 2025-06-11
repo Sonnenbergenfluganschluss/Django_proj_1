@@ -128,99 +128,11 @@ calendar['date'] = pd.to_datetime(calendar['date'])
 
 @login_required
 def home(request):
-
-
-
-
-    
-    # # Обработка данных (пример)
-    # context = {
-    #     'current_date': datetime.now().strftime("%d.%m.%Y"),
-    #     # Добавьте другие переменные, которые нужно передать в шаблон
-    # }
-    
-    # if request.method == 'POST':
-    #     # Обработка POST-запроса с данными формы
-    #     birthday = request.POST.get('birthday')
-    #     birthday = pd.to_datetime(birthday).strftime("%d.%m.%Y")
-
-    #     # our_date = request.POST.get('our_date')
-    #     # our_date = pd.to_datetime(our_date, dayfirst=True).strftime("%d.%m.%Y")
-
-    #     # city = request.POST.get('city')
-        
-    #     # Здесь добавьте вашу логику обработки даты и города
-    #     # ...
-        
-    #     # Добавьте результаты в контекст
-    #     context.update({
-    #         'birthday': birthday,
-    #         # 'our_date': our_date,
-    #         # 'city': city,
-    #         # Другие результаты вычислений
-    #     })
-    
-    # try:
-    #     birthday = pd.to_datetime(birthday, dayfirst=True).strftime("%d.%m.%Y")
-    #     # birthday = str(pd.to_datetime(birthday, dayfirst=True)).split()[0]
-    #     # st.markdown(f'Дата рождения: **{pd.to_datetime(birthday).strftime("%d.%m.%Y")}**')
-
-    #     if pd.to_datetime(birthday) < pd.to_datetime(seasons.loc[2, str(pd.to_datetime(birthday).year)]):
-    #         year_v = calendar[calendar['date']==pd.to_datetime(pd.to_datetime(birthday)-timedelta(days=51))]['years'].values[0]
-    #     else:
-    #         year_v = calendar[calendar['date']==pd.to_datetime(birthday)]['years'].values[0]
-
-    #     mv = calendar[calendar['date']==pd.to_datetime(birthday)]['months'].values[0]
-    #     if pd.to_datetime(birthday) < pd.to_datetime(seasons[seasons['Месяц']==mv.split()[0]][str(pd.to_datetime(birthday).year)].values[0]):
-    #         month_v = calendar[calendar['date']==pd.to_datetime(pd.to_datetime(birthday)-timedelta(days=21))]['months'].values[0]
-    #     else:
-    #         month_v = calendar[calendar['date']==pd.to_datetime(birthday)]['months'].values[0]
-    #     day_v = calendar[calendar['date']==pd.to_datetime(birthday)]['days'].values[0]
-    #     day_ier = cicle[cicle["Название_calendar"] == day_v]["Иероглиф"].values[0]
-    #     month_ier = cicle[cicle["Название_calendar"] == month_v]["Иероглиф"].values[0]
-    #     year_ier = cicle[cicle["Название_calendar"] == year_v]["Иероглиф"].values[0]
-
-
-    #     birthday_df = pd.DataFrame(columns=["День", "Месяц", "Год"], data=None)
-    #     birthday_df["День"] = [
-    #         f"{cicle[cicle['Название_calendar'] == day_v]['Название_Русский'].values[0]}",
-    #         day_ier
-    #     ]
-    #     birthday_df["Месяц"] = [
-    #         f"{cicle[cicle['Название_calendar'] == month_v]['Название_Русский'].values[0]}",
-    #         month_ier
-    #     ]
-    #     birthday_df["Год"] = [
-    #         f"{cicle[cicle['Название_calendar'] == year_v]['Название_Русский'].values[0]}",
-    #         year_ier
-    #     ]
-        
-    #     birthday_df['День'] = birthday_df['День'].apply(highlight_words)
-    #     birthday_df['Месяц'] = birthday_df['Месяц'].apply(highlight_words)
-    #     birthday_df['Год'] = birthday_df['Год'].apply(highlight_words)
-        
-    #     styled_df_b = birthday_df.to_html(
-    #             classes='table table-striped table-hover',
-    #             table_id='styled_df_b',
-    #             escape=False,
-    #             index=False,  # Не показывать индексы
-    #             # border=0,     # Без границ
-    #             justify='center'  # Выравнивание
-    #         )
-        
-    #     context.update({
-    #         'styled_df_b' : styled_df_b,
-    #     })
-    # #     st.write(styled_df_b, unsafe_allow_html=True)
-    # except:
-    #     print("Некорректная дата. Попробуйте снова")
-    
-    return render(request, 'accounts/home.html')
-
-
-
-
-
+    context = {
+        'current_date': datetime.now().strftime("%d.%m.%Y"),
+        # Добавьте другие переменные, которые нужно передать в шаблон
+    }
+    return render(request, 'accounts/home.html', context)
 
 
 
@@ -284,26 +196,49 @@ def process_birthday(request, calendar=calendar,
                 'birthday_table': styled_df_b
             }
             return JsonResponse(result)
-        
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)})
 
 
 
-def process_city(request):
+def process_city(request, cities=cities):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             city = data.get('city')
-            
-            # Ваши вычисления для города
+            cit = [""] + cities["Город"].values.tolist() + cities["Регион"].values.tolist() + cities["Н/п"].values.tolist()
+            if city in cit:
+                if len(cities[cities["Город"].str.contains(city, regex=True).fillna(False)]) != 0:
+                        raw = cities[cities["Город"].str.contains(city, regex=True).fillna(False)][["Индекс", "Тип региона", "Регион", "Тип района", 
+                                                                                            "Район", "Тип города", "Город", "Тип н/п", "Н/п", "Часовой пояс"]].dropna(axis=1)
+                elif len(cities[cities["Регион"].str.contains(city, regex=True).fillna(False)]) != 0:
+                        raw = (cities[cities["Регион"].str.contains(city, regex=True).fillna(False)][["Индекс", "Тип региона", "Регион", 
+                            "Тип района",	"Район", "Тип города", "Город", "Тип н/п",	"Н/п", "Часовой пояс"]].dropna(axis=1))
+                else:
+                    raw = (cities[cities["Н/п"].str.contains(city, regex=True).fillna(False)][["Индекс", "Тип региона", "Регион", 
+                            "Тип района",	"Район", "Тип города", "Город", "Тип н/п",	"Н/п", "Часовой пояс"]].dropna(axis=1))
+
+                id_city = raw.index
+                long = cities.loc[id_city, "Долгота"].values[0]
+                hours = int(long//15)
+                minutes = int(round((long/15 - hours)*60))
+
+                utc = int(raw["Часовой пояс"].values[0])
+
+                CURRENT_TIME = (datetime.utcnow() + timedelta(hours=utc)).time().strftime('%H:%M')
+                CURRENT_TIME_SOLAR = (datetime.utcnow() + timedelta(hours=hours, minutes=minutes)).time().strftime('%H:%M')
+            else:
+                f"Город {city} отсутствует в списке."
+
+
+
             result = {
                 'success': True,
-                'city_result': f"Обработан город: {city}",
-                'time_data': {}  # Результаты для времени
+                'admin_time': CURRENT_TIME,
+                'solar_time':CURRENT_TIME_SOLAR,
+                'city': f"Выбран город: {city}",
             }
             return JsonResponse(result)
-            
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)})
 
