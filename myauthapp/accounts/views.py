@@ -233,9 +233,6 @@ def process_birthday(request, calendar=calendar,
             print(birthday)
             try:
                 birthday = pd.to_datetime(birthday).strftime("%d.%m.%Y")
-                # birthday = str(pd.to_datetime(birthday, dayfirst=True)).split()[0]
-                # st.markdown(f'Дата рождения: **{pd.to_datetime(birthday).strftime("%d.%m.%Y")}**')
-
                 if pd.to_datetime(birthday) < pd.to_datetime(seasons.loc[2, str(pd.to_datetime(birthday).year)]):
                     year_v = calendar[calendar['date']==pd.to_datetime(pd.to_datetime(birthday)-timedelta(days=51))]['years'].values[0]
                 else:
@@ -278,8 +275,6 @@ def process_birthday(request, calendar=calendar,
                         # border=0,     # Без границ
                         justify='center'  # Выравнивание
                     )
-            
-            
             except:
                 print("Некорректная дата. Попробуйте снова")
             
@@ -292,6 +287,7 @@ def process_birthday(request, calendar=calendar,
         
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)})
+
 
 
 def process_city(request):
