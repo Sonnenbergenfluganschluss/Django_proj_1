@@ -14,13 +14,14 @@
         <input type="date" id="birthdayInput" required>
         <button id="submitBirthday">Отправить дату</button>
         <div id="birthdayResult"></div>
+        
     </div>
 
-    <div>
+    <!-- <div>
         <table>
             {{styled_df_b|safe}}
         </table>
-    </div>
+    </div> -->
     
     <!-- Форма для города (блокируется пока не отправлена дата) -->
     <div class="form-section">
@@ -49,20 +50,8 @@
         const data = await response.json();
         
         if (data.success) {
-            document.getElementById('birthdayResult').innerHTML = `<p style="color:green">${data.birthday_result}</p>`;
-            
-            
-            
-
-
-
-
-
-
-
-
-
-
+            document.getElementById('birthdayResult').innerHTML = `<p style="color:green">${data.birthday_table}</p>`;
+         
             // Активируем форму города
             document.getElementById('cityInput').disabled = false;
             document.getElementById('submitCity').disabled = false;
