@@ -230,17 +230,183 @@ def process_city(request, cities=cities):
             else:
                 f"Город {city} отсутствует в списке."
 
-
+ 
 
             result = {
                 'success': True,
                 'admin_time': CURRENT_TIME,
                 'solar_time':CURRENT_TIME_SOLAR,
+                'current_time': CURRENT_TIME_SOLAR,
                 'city': f"Выбран город: {city}",
             }
             return JsonResponse(result)
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)})
+        
+
+
+
+
+
+
+
+def process_our_date(request, calendar=calendar, 
+                     cicle=cicle, seasons=seasons, 
+                     highlight_words=highlight_words,
+                     CURRENT_TIME_SOLAR="17:35"):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            our_date = data.get('ourdate')
+            our_date = pd.to_datetime(our_date)
+            print(our_date)
+            # try:
+            # our_date = vis_date = re.sub('\D', '.', our_date)
+            # our_date = our_date.split('.')
+            d = int(our_date.day)
+            m = int(our_date.month)
+            y = int(our_date.year)
+            # our_date = date(y, m, d)
+
+            if pd.to_datetime(our_date) < pd.to_datetime(seasons.loc[2, str(our_date.year)]):
+                year_o = calendar[calendar['date']==pd.to_datetime(pd.to_datetime(our_date)-timedelta(days=51))]['years'].values[0]
+            else:
+                year_o = calendar[calendar['date']==pd.to_datetime(our_date)]['years'].values[0]
+
+            mo = calendar[calendar['date']==pd.to_datetime(our_date)]['months'].values[0]
+            if pd.to_datetime(our_date) < pd.to_datetime(seasons[seasons['Месяц']==mo.split()[0]][str(pd.to_datetime(our_date).year)].values[0]):
+                month_o = calendar[calendar['date']==pd.to_datetime(pd.to_datetime(our_date)-timedelta(days=21))]['months'].values[0]
+            else:
+                month_o = calendar[calendar['date']==pd.to_datetime(our_date)]['months'].values[0]
+
+            day_o = calendar[calendar['date']==pd.to_datetime(our_date)]['days'].values[0]
+            day = cicle[cicle["Название_calendar"] == day_o]["Название_Русский"].values[0]
+            day_iero = cicle[cicle["Название_calendar"] == day_o]["Иероглиф"].values[0]
+            month_iero = cicle[cicle["Название_calendar"] == month_o]["Иероглиф"].values[0]
+            year_iero = cicle[cicle["Название_calendar"] == year_o]["Иероглиф"].values[0]
+
+
+            our_date_df = pd.DataFrame(columns=["День", "Месяц", "Год"])
+            our_date_df["День"] = [
+                f"{cicle[cicle['Название_calendar'] == day_o]['Название_Русский'].values[0]}",
+                day_iero
+            ]
+            our_date_df["Месяц"] = [
+                f"{cicle[cicle['Название_calendar'] == month_o]['Название_Русский'].values[0]}",
+                month_iero
+            ]
+            our_date_df["Год"] = [
+                f"{cicle[cicle['Название_calendar'] == year_o]['Название_Русский'].values[0]}",
+                year_iero
+            ]
+            
+            our_date_df['День'] = our_date_df['День'].apply(highlight_words)
+            our_date_df['Месяц'] = our_date_df['Месяц'].apply(highlight_words)
+            our_date_df['Год'] = our_date_df['Год'].apply(highlight_words)
+            
+            styled_df_o = our_date_df.style.hide(axis="index").set_table_attributes('style="width: 100%;"').to_html()
+
+            # st.write(styled_df_o, unsafe_allow_html=True)
+            # except:
+            #     print("Некорректная дата. Попробуйте снова")
+                
+            feitenbafa = pd.read_csv("accounts/data/feitenbafa.csv")
+            for_feitenbafa = pd.read_csv("accounts/data/for_feitenbafa.csv")
+
+
+            day_predictions = feitenbafa.merge(for_feitenbafa.rename(columns={"Иероглиф":day_iero[0]}))
+            feitenbafa_day = day_predictions[[day_iero[0], 'Иероглиф',	'Время',	'Канал',	'Точки']]
+
+            current_hour = re.search(r"(\d*)", CURRENT_TIME_SOLAR)[0]
+
+            # Определяем час по текущему времени.
+
+            if (int(current_hour) == 23) or (int(current_hour) == 0):
+                current_hour_china_list = feitenbafa_day.iloc[0].values
+            else:
+                for h in range(1,12):
+                    if (int(current_hour) >= (feitenbafa['Время_int'][h])) & (int(current_hour) < (feitenbafa['Время_int'][h]+2)):
+                        current_hour_china_list = feitenbafa_day.iloc[h].values
+                        break
+
+            current_hour_china = ''.join(current_hour_china_list[:2])
+
+            # Инь-ян
+            in_yan_day = cicle[cicle['Название_calendar'] == day_o]['инь_ян'].values[0]
+        
+            # Определяем сезон по дате
+            if (pd.to_datetime(our_date) < pd.to_datetime(seasons[str(our_date.year)][0])) or (pd.to_datetime(our_date) >= pd.to_datetime(seasons[str(our_date.year)][23])):
+                season = seasons.iloc[23][["Символ", "Название", "Точки_Жэнь_май",	"Название_точки"]].values
+                n_season = seasons.iloc[23][['Сезон']].values[0]
+            else:
+                for d in range(23):
+                    if (pd.to_datetime(our_date) >= pd.to_datetime(seasons[str(our_date.year)][d])) & (pd.to_datetime(our_date)<pd.to_datetime(seasons[str(our_date.year)][d+1])):
+                        season = seasons.iloc[d][["Символ", "Название", "Точки_Жэнь_май",	"Название_точки"]].values
+                        n_season = seasons.iloc[d][['Сезон']].values[0]
+                        break
+            
+            # Определяем день недели
+            dow_dict = {0:"Понедельник", 1:"Вторник", 
+                    2:"Среда", 3:"Четверг",
+                    4:"Пятница", 5:"Суббота", 6:"Воскресенье"}
+
+            # Планета-покровитель
+            planet = planets[planets['День_недели']==pd.to_datetime(our_date).day_of_week]['Планета'].values[0]
+        
+            # Цзя Цзы
+            zya_zy = cicle[cicle['Название_calendar'] == day_o]['Цзя_Цзы'].values[0]
+
+
+            # Запреты выводим:
+            # Дни небесного запрета
+            day_sky_veto = pd.read_csv("accounts/data/day_sky_veto.csv")
+            id_v = day_sky_veto[day_sky_veto['сезон']==n_season].index
+            if ((day_iero[0]=='戊') or (day_iero[0]=='己')) and ((zya_zy==day_sky_veto.iloc[id_v, 1].values[0]) or (zya_zy==day_sky_veto.iloc[id_v, 2].values[0])):
+                str_veto = f"\
+                    \n1 {day_sky_veto.iloc[id_v, 3].values[0]} \
+                    \n2 Точки инь и ян каналов в области живота (ниже диафрагмы)"
+            elif (day_iero[0]=='戊') or (day_iero[0]=='己'):
+                str_veto = "Точки инь и ян каналов в области живота (ниже диафрагмы)"
+            elif (zya_zy==day_sky_veto.iloc[id_v, 1].values[0]) or (zya_zy==day_sky_veto.iloc[id_v, 2].values[0]):
+                str_veto = f"{day_sky_veto.iloc[id_v, 3].values[0]}"
+            else:
+                str_veto = "<span style='color: green;'>Запрета нет.<span>"
+
+            
+            
+            str_result = f"<p>День: {in_yan_day.capitalize()}</p>\
+                        \n<p>ЦзяЦзы дня: № {zya_zy}</p>\
+                        \n<p>Точки 24 Сезонов (Жэнь май): {'  ||  '.join(season).strip()}</p>\
+                        \n<p>День недели: {dow_dict[pd.to_datetime(our_date).day_of_week]}</p>\
+                        \n<p>Планета-покровитель: {planet.capitalize()}</p>\
+                        \n<p>Запрет по 4 сезонам:{veto[veto['месяц']==month_iero[1]]['запрет'].values[0]}\
+                        \n<p>Запреты на ручные каналы:</p>\
+                        \n  <p>{sky_hands[sky_hands['Иероглиф']==day_iero[0]]['канал'].values[0]}, \
+                                {sky_hands[sky_hands['Иероглиф']==day_iero[0]]['сторона_тела'].values[0]} сторона:  пять точек транспортировки и точки между ними (до локтя)</p>\
+                        \n<p>Запреты на ножные каналы:</p>\
+                        \n  <p>{earth_legs[earth_legs['Иероглиф']==month_iero[1]]['канал'].values[0]}, \
+                                {earth_legs[earth_legs['Иероглиф']==month_iero[1]]['сторона_тела'].values[0]} сторона: пять точек транспортировки и точки между ними (до колена)</p>\
+                        \n<p>Дни небесного запрета: {str_veto}</p>"
+            
+            result = {
+                'success': True,
+                'our_date_result': our_date,
+                'our_date_table': styled_df_o,
+                'str_result': str_result,
+                'current_hour_china': current_hour_china,
+            }
+            return JsonResponse(result)
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+        
+
+
+
+
+
+
+
+
 
 
 def register(request):

@@ -28,16 +28,16 @@
         <div id="checkTime"></div>
     </div>
     
-<!-- 
+
     <div class="form-section">
         <h3>Введите интересующую дату</h3>
         <input type="date" id="ourdateInput" disabled required>
         <button id="submitOurdate">Отправить дату</button>
         <div id="ourdateResult"></div>
-    </div> -->
+    </div>
 
     <script>
-    // Обработка даты
+    // Обработка даты рождения
     document.getElementById('submitBirthday').addEventListener('click', async () => {
         const birthday = document.getElementById('birthdayInput').value;
         
@@ -111,9 +111,50 @@
                 console.log('Текущее время:', current_time); // Для отладки
                 document.getElementById('checkTime').innerHTML = `<div>Рассчетное время ${current_time}</div>`;
             });
+            // Активируем форму даты
+            document.getElementById('ourdateInput').disabled = false;
+            document.getElementById('submitOurdate').disabled = false;
             
+            // Сохраняем данные для последующих вычислений
+            window.complexData = data.birthday_result;
+        } else {
+            alert('Ошибка: ' + data.error);
         }
+
     })
+
+    // Обработка даты
+    document.getElementById('submitOurdate').addEventListener('click', async () => {
+        const ourdate = document.getElementById('ourdateInput').value;
+        
+        // Добавляем данные из предыдущего запроса
+        const postData = { 
+            ourdate,
+            ...window.complexData  // Распаковываем сохранённые данные
+        };        
+        
+        const response = await fetch("{% url 'process_our_date' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ ourdate })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            document.getElementById('ourdateResult').innerHTML = `
+            <p>${data.our_date_table}</p>
+            <p>${data.str_result}</p>`;
+            
+            // Сохраняем данные для последующих вычислений
+            window.complexData = data.our_date_result, data.current_hour_china;
+        } else {
+            alert('Ошибка: ' + data.error);
+        }
+    });
     </script>
 
 
