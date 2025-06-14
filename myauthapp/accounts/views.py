@@ -127,10 +127,12 @@ cities, earth_legs, sky_hands, planets, moon_palace_df, calendar, cicle, seasons
 calendar['date'] = pd.to_datetime(calendar['date'])
 
 @login_required
-def home(request):
+def home(request, cities=cities):
+    cit = cities["Город"].values.tolist()
+    print("Cities before JSON:", cit[:10])
     context = {
         'current_date': datetime.now().strftime("%d.%m.%Y"),
-        # Добавьте другие переменные, которые нужно передать в шаблон
+        'cities_json': json.dumps(cit), # Добавьте другие переменные, которые нужно передать в шаблон
     }
     return render(request, 'accounts/home.html', context)
 
@@ -206,17 +208,12 @@ def process_city(request, cities=cities):
         try:
             data = json.loads(request.body)
             city = data.get('city')
-            cit = [""] + cities["Город"].values.tolist() + cities["Регион"].values.tolist() + cities["Н/п"].values.tolist()
+            cit = cities["Город"].values.tolist()
             if city in cit:
                 if len(cities[cities["Город"].str.contains(city, regex=True).fillna(False)]) != 0:
-                        raw = cities[cities["Город"].str.contains(city, regex=True).fillna(False)][["Индекс", "Тип региона", "Регион", "Тип района", 
-                                                                                            "Район", "Тип города", "Город", "Тип н/п", "Н/п", "Часовой пояс"]].dropna(axis=1)
-                elif len(cities[cities["Регион"].str.contains(city, regex=True).fillna(False)]) != 0:
-                        raw = (cities[cities["Регион"].str.contains(city, regex=True).fillna(False)][["Индекс", "Тип региона", "Регион", 
-                            "Тип района",	"Район", "Тип города", "Город", "Тип н/п",	"Н/п", "Часовой пояс"]].dropna(axis=1))
+                        raw = cities[cities["Город"].str.contains(city, regex=True)][["Индекс", "Город", "Часовой пояс"]]
                 else:
-                    raw = (cities[cities["Н/п"].str.contains(city, regex=True).fillna(False)][["Индекс", "Тип региона", "Регион", 
-                            "Тип района",	"Район", "Тип города", "Город", "Тип н/п",	"Н/п", "Часовой пояс"]].dropna(axis=1))
+                    print("Города нет в списке")
 
                 id_city = raw.index
                 long = cities.loc[id_city, "Долгота"].values[0]
@@ -237,26 +234,44 @@ def process_city(request, cities=cities):
                 'admin_time': CURRENT_TIME,
                 'solar_time':CURRENT_TIME_SOLAR,
                 'current_time': CURRENT_TIME_SOLAR,
-                'city': f"Выбран город: {city}",
+                'city': f"Выбран город: {city}"
             }
             return JsonResponse(result)
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)})
         
-
-
-
-
-
+def city_search(request, cities=cities):
+    """API для поиска городов"""
+    try:
+        query = request.GET.get('q', '').strip().lower()
+        
+        # 1. Получаем список городов из контекста (можно заменить на cache/db)
+        cit = cities["Город"].values.tolist()
+        
+        # 2. Фильтрация (регистронезависимый поиск подстроки)
+        filtered = [
+            city for city in cit 
+            if query in city.lower()
+        ]  # Лимит результатов
+        
+        # 3. Возвращаем JSON (отключаем ASCII-кодирование для кириллицы)
+        return JsonResponse(filtered, safe=False, json_dumps_params={'ensure_ascii': False})
+    
+    except Exception as e:
+        # Логируем ошибку и возвращаем пустой список
+        import logging
+        logging.error(f"City search error: {str(e)}")
+        return JsonResponse([], safe=False)
 
 
 def process_our_date(request, calendar=calendar, 
                      cicle=cicle, seasons=seasons, 
-                     highlight_words=highlight_words,
-                     CURRENT_TIME_SOLAR="17:35"):
+                     highlight_words=highlight_words):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
+            CURRENT_TIME_SOLAR = data.get('current_time')
+            print(CURRENT_TIME_SOLAR)
             our_date = data.get('ourdate')
             our_date = pd.to_datetime(our_date)
             print(our_date)
@@ -363,30 +378,30 @@ def process_our_date(request, calendar=calendar,
             id_v = day_sky_veto[day_sky_veto['сезон']==n_season].index
             if ((day_iero[0]=='戊') or (day_iero[0]=='己')) and ((zya_zy==day_sky_veto.iloc[id_v, 1].values[0]) or (zya_zy==day_sky_veto.iloc[id_v, 2].values[0])):
                 str_veto = f"\
-                    \n1 {day_sky_veto.iloc[id_v, 3].values[0]} \
-                    \n2 Точки инь и ян каналов в области живота (ниже диафрагмы)"
+                    \n1 <span style='color: red;'>{day_sky_veto.iloc[id_v, 3].values[0]}</span> \
+                    \n2 <span style='color: red;'>Точки инь и ян каналов в области живота (ниже диафрагмы)</span>"
             elif (day_iero[0]=='戊') or (day_iero[0]=='己'):
-                str_veto = "Точки инь и ян каналов в области живота (ниже диафрагмы)"
+                str_veto = "<span style='color: red;'>Точки инь и ян каналов в области живота (ниже диафрагмы)</span>"
             elif (zya_zy==day_sky_veto.iloc[id_v, 1].values[0]) or (zya_zy==day_sky_veto.iloc[id_v, 2].values[0]):
-                str_veto = f"{day_sky_veto.iloc[id_v, 3].values[0]}"
+                str_veto = f"<span style='color: red;'>{day_sky_veto.iloc[id_v, 3].values[0]}</span>"
             else:
-                str_veto = "<span style='color: green;'>Запрета нет.<span>"
+                str_veto = "<span style='color: #3d7945;'>Запрета нет.</span>"
 
             
             
-            str_result = f"<p>День: {in_yan_day.capitalize()}</p>\
-                        \n<p>ЦзяЦзы дня: № {zya_zy}</p>\
-                        \n<p>Точки 24 Сезонов (Жэнь май): {'  ||  '.join(season).strip()}</p>\
-                        \n<p>День недели: {dow_dict[pd.to_datetime(our_date).day_of_week]}</p>\
-                        \n<p>Планета-покровитель: {planet.capitalize()}</p>\
-                        \n<p>Запрет по 4 сезонам:{veto[veto['месяц']==month_iero[1]]['запрет'].values[0]}\
-                        \n<p>Запреты на ручные каналы:</p>\
-                        \n  <p>{sky_hands[sky_hands['Иероглиф']==day_iero[0]]['канал'].values[0]}, \
-                                {sky_hands[sky_hands['Иероглиф']==day_iero[0]]['сторона_тела'].values[0]} сторона:  пять точек транспортировки и точки между ними (до локтя)</p>\
-                        \n<p>Запреты на ножные каналы:</p>\
-                        \n  <p>{earth_legs[earth_legs['Иероглиф']==month_iero[1]]['канал'].values[0]}, \
-                                {earth_legs[earth_legs['Иероглиф']==month_iero[1]]['сторона_тела'].values[0]} сторона: пять точек транспортировки и точки между ними (до колена)</p>\
-                        \n<p>Дни небесного запрета: {str_veto}</p>"
+            str_result = f"<div><p>День: <span style='font-weight: bold;'>{in_yan_day.capitalize()}</span>\
+                        \n<br>ЦзяЦзы дня: № <span style='font-weight: bold; color: #1e88e5;'>{zya_zy}</span>\
+                        \n<br>Точки 24 Сезонов (Жэнь май): <span style='color: #1e88e5;'>{'  ||  '.join(season).strip()}</span>\
+                        \n<br>День недели: <span style='font-weight: bold;'>{dow_dict[pd.to_datetime(our_date).day_of_week]}</span>\
+                        \n<br>Планета-покровитель: <span style='color: #3d7945; font-weight: bold;'>{planet.capitalize()}</span>\
+                        \n<br><span style='font-style: italic;'>Запрет по 4 сезонам:</span> <span style='font-weight: bold;'>{veto[veto['месяц']==month_iero[1]]['запрет'].values[0]}</span>\
+                        \n<br><span style='font-style: italic;'>Запреты на ручные каналы:</span>\
+                        \n  <br><span style='font-weight: bold; color: red;'>{sky_hands[sky_hands['Иероглиф']==day_iero[0]]['канал'].values[0]}</span>, \
+                                <span style='font-weight: bold;'>{sky_hands[sky_hands['Иероглиф']==day_iero[0]]['сторона_тела'].values[0]} сторона:  пять точек транспортировки и точки между ними (до локтя)</span>\
+                        \n<br><span style='font-style: italic;'>Запреты на ножные каналы:</span>\
+                        \n  <br><span style='font-weight: bold; color: red;'>{earth_legs[earth_legs['Иероглиф']==month_iero[1]]['канал'].values[0]}</span>, \
+                                <span style='font-weight: bold; '>{earth_legs[earth_legs['Иероглиф']==month_iero[1]]['сторона_тела'].values[0]} сторона: пять точек транспортировки и точки между ними (до колена)</span>\
+                        \n<br><span style='font-style: italic;'>Дни небесного запрета:</span> {str_veto}</p></div>"
             
             result = {
                 'success': True,

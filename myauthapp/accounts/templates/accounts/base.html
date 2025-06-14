@@ -115,11 +115,6 @@
             margin-top: 5px;
         }
         
-        /* button:hover, input[type="submit"]:hover {
-            background-color: #6b96c7;
-            margin-top: 10px;
-        } */
-        
         .messages {
             list-style: none;
             padding: 0;
@@ -164,6 +159,50 @@
         .datefields {
             background-color: #eeeeee;
             border-radius: 10px;
+        }
+
+        label {
+            color: rgb(217, 90, 0);
+            font-size: 14px;
+        }
+
+        .dropdown-container {
+            position: relative;
+            width: 100%;
+            background-color: #eeeeee;
+            border-radius: 10px;            
+        }
+
+        /* #citySearch {
+            width: 100%;
+            padding: 8px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        } */
+
+        #citySelect {
+            /* position: absolute; */
+            width: 100%;
+            max-height: 300px;
+            /* overflow-y: auto; */
+            border: 1px solid #ddd;
+            /* border-top: none; */
+            /* background: white; */
+            z-index: 1000;
+            /* margin-top: -1px; */
+            /* display: none; */
+            background-color: #f8f8f8;
+            border-radius: 10px; 
+        }
+
+        #citySelect option {
+            padding: 8px;
+            cursor: pointer;
+        }
+
+        #citySelect option:hover {
+            background-color: #f0f0f0;
         }
     </style>
 </head>

@@ -10,7 +10,7 @@
 
     <!-- Форма для даты -->
     <div class="form-section">
-        <h3>Введите дату рождения</h3>
+        <label>Введите дату рождения</label>
         <input type="date" id="birthdayInput" required>
         <button id="submitBirthday">Отправить дату</button>
         <div id="birthdayResult"></div>
@@ -18,9 +18,15 @@
     
     <!-- Форма для города (блокируется пока не отправлена дата) -->
     <div class="form-section">
-        <h3>Введите город</h3>
-        <input type="text" id="cityInput" disabled required>
-        <button id="submitCity" disabled>Отправить город</button>
+        <label for="citySelect">Введите город:</label>
+        <div class="dropdown-container">
+            <input type="text" id="citySearch" placeholder="Начните вводить..." 
+                autocomplete="off" >
+            <select id="citySelect" size="5" style="display: none;">
+                <!-- Варианты будут добавляться динамически -->
+            </select>
+        </div>
+        <button id="submitCity" >Отправить город</button>
         <div id="cityResult"></div>
         <label>
             <input type="checkbox" id="changeTime"> Нужен расчёт по административному времени
@@ -30,8 +36,8 @@
     
 
     <div class="form-section">
-        <h3>Введите интересующую дату</h3>
-        <input type="date" id="ourdateInput" disabled required>
+        <label>Введите интересующую дату</label>
+        <input type="date" id="ourdateInput" value="{{ current_date|default:'' }}" disabled required>
         <button id="submitOurdate">Отправить дату</button>
         <div id="ourdateResult"></div>
     </div>
@@ -54,10 +60,7 @@
         
         if (data.success) {
             document.getElementById('birthdayResult').innerHTML = `<p>${data.birthday_table}</p>`;
-         
-            // Активируем форму города
-            document.getElementById('cityInput').disabled = false;
-            document.getElementById('submitCity').disabled = false;
+        
             
             // Сохраняем данные для последующих вычислений
             window.complexData = data.birthday_result;
@@ -65,10 +68,76 @@
             alert('Ошибка: ' + data.error);
         }
     });
+    
 
-    // Обработка города
+    // Автодополнение городов
+    document.addEventListener('DOMContentLoaded', function() {
+        const cities = JSON.parse('{{ cities_json|safe }}');
+        console.log('Загружено городов:', cities.length);
+        const searchInput = document.getElementById('citySearch');
+        const citySelect = document.getElementById('citySelect');
+        const submitCityBtn = document.getElementById('submitCity');
+        let selectedCity = null;
+
+        // Активация при вводе текста
+        searchInput.addEventListener('input', function() {
+            console.log('Ввод:', this.value);
+            const searchTerm = this.value.toLowerCase();
+            citySelect.innerHTML = '';
+            
+            // if (searchTerm.length < 2) {
+            //     citySelect.style.display = 'none';
+            //     submitCityBtn.disabled = true;
+            //     return;
+            // }
+
+            // Фильтрация городов (исправленная версия)
+            const filtered = cities.filter(city => 
+                city.toLowerCase().includes(searchTerm)
+            ).slice(0, 15);
+
+            if (filtered.length > 0) {
+                filtered.forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city;
+                    option.textContent = city;
+                    citySelect.appendChild(option);
+                });
+                citySelect.style.display = 'block';
+                submitCityBtn.disabled = false;
+            } else {
+                citySelect.style.display = 'none';
+                submitCityBtn.disabled = true;
+            }
+        });
+
+        // Выбор города из списка
+        citySelect.addEventListener('click', function() {
+            if (this.selectedIndex >= 0) {
+                searchInput.value = this.options[this.selectedIndex].value;
+                selectedCity = searchInput.value;
+                this.style.display = 'none';
+            }
+        });
+
+        // Закрытие списка при клике вне его
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.dropdown-container')) {
+                citySelect.style.display = 'none';
+            }
+        });
+
+    });
+    
+    // отправка города
     document.getElementById('submitCity').addEventListener('click', async () => {
-        const city = document.getElementById('cityInput').value;
+        const city = document.getElementById('citySearch').value;
+        
+        if (!city) {
+            alert('Пожалуйста, выберите город из списка');
+            return;
+        }
+
         
         // Добавляем данные из предыдущего запроса
         const postData = { 
@@ -103,35 +172,53 @@
             
             
             // Инициализируем переменную времени
-            current_time = data.solar_time;
+            let current_time = data.solar_time;
+            document.getElementById('checkTime').innerHTML = `<div>Рассчетное время ${current_time}</div>`;
             
             // Обработчик изменения чекбокса
             document.getElementById('changeTime').addEventListener('change', function() {
                 current_time = this.checked ? data.admin_time : data.solar_time;
                 console.log('Текущее время:', current_time); // Для отладки
                 document.getElementById('checkTime').innerHTML = `<div>Рассчетное время ${current_time}</div>`;
+                // Сохраняем данные для последующих вычислений
             });
+            
+            
+            window.complexData = {
+                current_time: current_time
+            };
+
             // Активируем форму даты
             document.getElementById('ourdateInput').disabled = false;
             document.getElementById('submitOurdate').disabled = false;
             
-            // Сохраняем данные для последующих вычислений
-            window.complexData = data.birthday_result;
         } else {
             alert('Ошибка: ' + data.error);
         }
 
     })
 
+    // Если Django не передал дату, используем текущую
+    document.addEventListener('DOMContentLoaded', function() {
+        const dateInput = document.getElementById('ourdateInput');
+        if (!dateInput.value) {
+            dateInput.value = new Date().toISOString().split('T')[0];
+        }
+    });
     // Обработка даты
     document.getElementById('submitOurdate').addEventListener('click', async () => {
         const ourdate = document.getElementById('ourdateInput').value;
         
-        // Добавляем данные из предыдущего запроса
-        const postData = { 
-            ourdate,
-            ...window.complexData  // Распаковываем сохранённые данные
-        };        
+        if (!window.complexData) {
+            alert('window.complexData пуст');
+            return;
+        }
+        
+        // Формируем данные для отправки
+        const postData = {
+            ourdate: ourdate,
+            current_time: window.complexData.current_time
+        };       
         
         const response = await fetch("{% url 'process_our_date' %}", {
             method: 'POST',
@@ -139,7 +226,7 @@
                 'Content-Type': 'application/json',
                 'X-CSRFToken': '{{ csrf_token }}'
             },
-            body: JSON.stringify({ ourdate })
+            body: JSON.stringify(postData)
         });
         
         const data = await response.json();
