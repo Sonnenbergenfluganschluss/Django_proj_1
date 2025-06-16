@@ -13,7 +13,6 @@
         <label>Введите дату рождения
             <input type="date" id="birthdayInput" value="{{ current_date|default:'' }}" required>
         </label>
-        <button id="submitBirthday">Отправить дату</button>
         <div id="birthdayResult"></div>
     </div>
     
@@ -61,48 +60,51 @@
     </div>
 
     <script>
-    
-        // let birthdayDate = null;
-        // let cityData = null;
-        // let ourDate = null;
-        // let current_time = null;
-        
         window.complexData = {}
-        
-        const savedData = sessionStorage.getItem('calculationData');
+        const savedData = sessionStorage.getItem('complexData');
         if (savedData) {
         window.complexData = JSON.parse(savedData);
     }
 
 
-
-    // Обработка даты рождения
-    document.getElementById('submitBirthday').addEventListener('click', async () => {
-        const birthday = document.getElementById('birthdayInput').value;
-        
-        const response = await fetch("{% url 'process_birthday' %}", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}'
-            },
-            body: JSON.stringify({ birthday })
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            document.getElementById('birthdayResult').innerHTML = `<p>${data.birthday_table}</p>`;
-        
-            
-            // Сохраняем данные для последующих вычислений
-            window.complexData = {birthday: data.birthday_result};
-        } else {
-            alert('Ошибка: ' + data.error);
-
+    // Обработчик изменения даты и нажатия Enter
+    document.getElementById('birthdayInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            processBirthday();
         }
     });
-    
+    // Функция обработки даты рождения
+    async function processBirthday() {
+        const birthday = document.getElementById('birthdayInput').value;
+        
+        // Проверка, что дата введена
+        if (!birthday) return;
+        
+        try {
+            const response = await fetch("{% url 'process_birthday' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ birthday })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                document.getElementById('birthdayResult').innerHTML = `<p>${data.birthday_table}</p>`;
+                
+                // Сохраняем данные для последующих вычислений
+                window.complexData = {birthday: data.birthday_result};
+            } else {
+                alert('Ошибка: ' + data.error);
+            }
+        } catch (error) {
+            console.error('Ошибка:', error);
+            alert('Произошла ошибка при отправке данных');
+        }
+    }
 
     // Автодополнение городов
     document.addEventListener('DOMContentLoaded', function() {
@@ -118,12 +120,6 @@
             console.log('Ввод:', this.value);
             const searchTerm = this.value.toLowerCase();
             citySelect.innerHTML = '';
-            
-            // if (searchTerm.length < 2) {
-            //     citySelect.style.display = 'none';
-            //     submitCityBtn.disabled = true;
-            //     return;
-            // }
 
             // Фильтрация городов (исправленная версия)
             const filtered = cities.filter(city => 

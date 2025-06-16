@@ -633,14 +633,14 @@ def process_method(request):
                 if method=="ДА СЯО ЧЖОУ ТЯНЬ ЖЭНЬ ФА":
                     da_syao = pd.read_csv("accounts/data/da_syao.csv")
                     current_hour_china_list = da_syao[current_hour_china[1]].to_list()
-                    
+                    current_hour_china_str = ' || '.join(current_hour_china_list)
                     for c in da_syao.columns:
                         da_syao[c] = da_syao[c].apply(highlight_words)
 
                     df = da_syao.style.hide(axis="index").map(lambda x: f"background-color: {'yellow' if x else 'red'}", subset=current_hour_china[1]).to_html()
 
                     return f"\
-                        <div>' || '.join({current_hour_china_list})</div>\
+                        <div>{current_hour_china_str}</div>\
                         <table>\
                             {df}\
                         </table>\
