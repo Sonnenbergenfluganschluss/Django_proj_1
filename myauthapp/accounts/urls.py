@@ -8,6 +8,7 @@ urlpatterns = [
      path('city_search/', views.city_search, name='city_search'),
      path('process_city/', views.process_city, name='process_city'),
      path('process_our_date/', views.process_our_date, name='process_our_date'),
+     path('process_method/', views.process_method, name='process_method'),
      path('accounts/login/', auth_views.LoginView.as_view(template_name='accounts/login.html'), name='login'),
      path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),
      path('accounts/register/', views.register, name='register'),

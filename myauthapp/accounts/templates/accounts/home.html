@@ -10,8 +10,9 @@
 
     <!-- Форма для даты -->
     <div class="form-section">
-        <label>Введите дату рождения</label>
-        <input type="date" id="birthdayInput" required>
+        <label>Введите дату рождения
+            <input type="date" id="birthdayInput" value="{{ current_date|default:'' }}" required>
+        </label>
         <button id="submitBirthday">Отправить дату</button>
         <div id="birthdayResult"></div>
     </div>
@@ -36,13 +37,45 @@
     
 
     <div class="form-section">
-        <label>Введите интересующую дату</label>
-        <input type="date" id="ourdateInput" value="{{ current_date|default:'' }}" disabled required>
+        <label>Введите интересующую дату
+            <input type="date" id="ourdateInput" value="{{ current_date|default:'' }}" disabled required>
+        </label>
         <button id="submitOurdate">Отправить дату</button>
         <div id="ourdateResult"></div>
     </div>
 
+    <div class="form-section">
+        <label for="methodSelect">Выберите метод расчета:</label>
+        <select id="methodSelect" style="width: 100%;
+                                    border: 2px solid #4a7b9d;
+                                    border-radius: 10px;
+                                    text-align: center; 
+                                    height: 40px; 
+                                    font-size: 16px;">
+            {% for method in methods %}
+                <option value="{{ forloop.counter0 }}" >{{ method }}</option>
+            {% endfor %}
+        </select>
+        <button id="submitMethod" class="btn btn-primary mt-2">Рассчитать</button>
+        <div id="methodResult" class="mt-3"></div>
+    </div>
+
     <script>
+    
+        // let birthdayDate = null;
+        // let cityData = null;
+        // let ourDate = null;
+        // let current_time = null;
+        
+        window.complexData = {}
+        
+        const savedData = sessionStorage.getItem('calculationData');
+        if (savedData) {
+        window.complexData = JSON.parse(savedData);
+    }
+
+
+
     // Обработка даты рождения
     document.getElementById('submitBirthday').addEventListener('click', async () => {
         const birthday = document.getElementById('birthdayInput').value;
@@ -63,9 +96,10 @@
         
             
             // Сохраняем данные для последующих вычислений
-            window.complexData = data.birthday_result;
+            window.complexData = {birthday: data.birthday_result};
         } else {
             alert('Ошибка: ' + data.error);
+
         }
     });
     
@@ -110,6 +144,7 @@
                 submitCityBtn.disabled = true;
             }
         });
+
 
         // Выбор города из списка
         citySelect.addEventListener('click', function() {
@@ -172,22 +207,18 @@
             
             
             // Инициализируем переменную времени
-            let current_time = data.solar_time;
-            document.getElementById('checkTime').innerHTML = `<div>Рассчетное время ${current_time}</div>`;
+            window.complexData.current_time = data.solar_time;
+            console.log('window.complexData: ', window.complexData);
+            document.getElementById('checkTime').innerHTML = `<div>Рассчетное время ${window.complexData.current_time}</div>`;
             
             // Обработчик изменения чекбокса
             document.getElementById('changeTime').addEventListener('change', function() {
-                current_time = this.checked ? data.admin_time : data.solar_time;
-                console.log('Текущее время:', current_time); // Для отладки
-                document.getElementById('checkTime').innerHTML = `<div>Рассчетное время ${current_time}</div>`;
-                // Сохраняем данные для последующих вычислений
+                window.complexData.current_time = this.checked ? data.admin_time : data.solar_time;
+                console.log('Текущее время:', window.complexData.current_time); // Для отладки
+                document.getElementById('checkTime').innerHTML = `<div>Рассчетное время ${window.complexData.current_time}</div>`;
             });
+            console.log('window.complexData: ', window.complexData);
             
-            
-            window.complexData = {
-                current_time: current_time
-            };
-
             // Активируем форму даты
             document.getElementById('ourdateInput').disabled = false;
             document.getElementById('submitOurdate').disabled = false;
@@ -205,6 +236,7 @@
             dateInput.value = new Date().toISOString().split('T')[0];
         }
     });
+
     // Обработка даты
     document.getElementById('submitOurdate').addEventListener('click', async () => {
         const ourdate = document.getElementById('ourdateInput').value;
@@ -237,11 +269,70 @@
             <p>${data.str_result}</p>`;
             
             // Сохраняем данные для последующих вычислений
-            window.complexData = data.our_date_result, data.current_hour_china;
+            window.complexData.day_iero = data.day_iero;
+            window.complexData.our_date = data.our_date_result,
+            console.log('window.complexData: ', window.complexData);
         } else {
             alert('Ошибка: ' + data.error);
         }
     });
+
+        document.addEventListener('DOMContentLoaded', function() {
+        const methodSelect = document.getElementById('methodSelect');
+        const submitMethod = document.getElementById('submitMethod');
+        const methodResult = document.getElementById('methodResult');
+        
+        submitMethod.addEventListener('click', async function() {
+            const methodIndex = methodSelect.value;
+
+            if (!window.complexData) {
+                alert('window.complexData пуст');
+                return;
+            }
+
+            const postData = {
+                methodIndex: methodIndex,
+                ...window.complexData,
+            };           
+            console.log('postData: ', postData);
+            try {
+                const response = await fetch("{% url 'process_method' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify(postData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    methodResult.innerHTML = `
+                        <div class="alert alert-success">
+                            <h4>Метод: ${data.method}</h4>
+                            <div>${data.result}</div>
+                        </div>
+                    `;
+                } else {
+                    methodResult.innerHTML = `
+                        <div class="alert alert-danger">
+                            Ошибка: ${data.error}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                methodResult.innerHTML = `
+                    <div class="alert alert-danger">
+                        Ошибка сети: ${error.message}
+                    </div>
+                `;
+            }
+        });
+    });
+
+    // Сохранение данных при перезагрузке страницы
+    sessionStorage.setItem('complexData', JSON.stringify(window.complexData));
     </script>
 
 

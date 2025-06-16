@@ -87,6 +87,34 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             overflow: hidden;
+            table-layout: fixed;
+        }
+
+        .table_moon_palace {
+            width: 60%;
+            border-collapse: collapse;
+        }  
+        
+        .scrollable-table {
+            width: 100%;
+            max-height: 350px;  /* Фиксированная высота */
+            overflow-y: auto;   /* Вертикальная прокрутка */
+            /* display: block; */
+            border: 0px;
+            border-radius: 10px;
+            border-collapse: collapse;
+            margin: 20px auto;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            /* overflow: hidden; */
+            table-layout: fixed;
+        }
+        .scrollable-table thead tr {
+            position: sticky;    /* Фиксируем заголовки */
+            top: 0;              /* Прилипаем к верху контейнера */
+            background: #f8f9fa; /* Цвет фона */
+            z-index: 100;         /* Заголовки поверх содержимого */
+            box-shadow: 0 2px 2px -1px rgba(0,0,0,0.1);
         }
 
         td, th {
@@ -203,6 +231,33 @@
 
         #citySelect option:hover {
             background-color: #f0f0f0;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+        }
+
+        /* .alert-success {
+            color: #3c763d;
+            background-color: #dff0d8;
+            border-color: #d6e9c6;
+        } */
+
+        .alert-danger {
+            color: #a94442;
+            background-color: #f2dede;
+            border-color: #ebccd1;
         }
     </style>
 </head>
