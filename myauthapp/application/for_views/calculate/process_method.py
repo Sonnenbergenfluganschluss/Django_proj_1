@@ -10,6 +10,7 @@ from .methods.feitenbafa import get_feiten
 from .methods.linguibafa import get_lingui
 from .methods.taiyanbafa import get_taiyan
 from .methods.dasyao import get_dasyao
+from .methods.open_points import get_open_points
 
 
 # Настройка логгера
@@ -29,7 +30,7 @@ def process_method(request):
             method_index = int(data.get('methodIndex'))
             methods = [" ", "ЛУННЫЕ ДВОРЦЫ", "ФЭЙ ТЭН БА ФА", 
                       "ЛИН ГУЙ БА ФА", "ТАЙ ЯН БА ФА", 
-                      "ДА СЯО ЧЖОУ ТЯНЬ ЖЭНЬ ФА"]
+                      "ДА СЯО ЧЖОУ ТЯНЬ ЖЭНЬ ФА", "Открытые точки структуры небесных стволов"]
             selected_method = methods[method_index]
             request.session['current_method'] = selected_method
 
@@ -83,6 +84,9 @@ def process_method(request):
                
                 elif method=="ДА СЯО ЧЖОУ ТЯНЬ ЖЭНЬ ФА":
                     return get_dasyao(current_hour_china, headOfT, timeOfT)
+                
+                elif method=="Открытые точки структуры небесных стволов":
+                    return get_open_points(CURRENT_TIME_SOLAR)
                 
                 
             result = calculate_method(selected_method)  
