@@ -1,5 +1,5 @@
 EMAIL_HOST='smtp.spaceweb.ru'
-EMAIL_PORT=2525
+EMAIL_PORT=25
 EMAIL_USE_SSL=False
 EMAIL_USE_TLS=False
 
