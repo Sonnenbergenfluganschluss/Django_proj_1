@@ -10,7 +10,7 @@ from .methods.feitenbafa import get_feiten
 from .methods.linguibafa import get_lingui
 from .methods.taiyanbafa import get_taiyan
 from .methods.dasyao import get_dasyao
-from .methods.open_points import get_open_points
+from .methods.open_points import get_additional_points
 
 
 # Настройка логгера
@@ -86,7 +86,7 @@ def process_method(request):
                     return get_dasyao(current_hour_china, headOfT, timeOfT)
                 
                 elif method=="Открытые точки структуры небесных стволов":
-                    return get_open_points(CURRENT_TIME_SOLAR)
+                    return get_additional_points(day_iero, CURRENT_TIME_SOLAR)
                 
                 
             result = calculate_method(selected_method)  

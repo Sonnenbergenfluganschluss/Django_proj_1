@@ -141,3 +141,36 @@ open_sky_points = {'kid10': (datetime.time(3, 28, 48), datetime.time(3, 57, 35))
  'ht3': (datetime.time(2, 2, 24), datetime.time(2, 31, 11)),
  'sp9': (datetime.time(2, 31, 12), datetime.time(2, 59, 59)),
  'lu5': (datetime.time(3, 0), datetime.time(3, 28, 47))}
+
+col_time = {'子': (datetime.time(23, 0), datetime.time(0, 59)),
+            '丑': (datetime.time(1, 0), datetime.time(2, 59)),
+            '寅': (datetime.time(3, 0), datetime.time(4, 59)),
+            '卯': (datetime.time(5, 0), datetime.time(6, 59)),
+            '辰': (datetime.time(7, 0), datetime.time(8, 59)),
+            '巳': (datetime.time(9, 0), datetime.time(10, 59)),
+            '午': (datetime.time(11, 0), datetime.time(12, 59)),
+            '未': (datetime.time(13, 0), datetime.time(14, 59)),
+            '申': (datetime.time(15, 0), datetime.time(16, 59)),
+            '酉': (datetime.time(17, 0), datetime.time(18, 59)),
+            '戌': (datetime.time(19, 0), datetime.time(20, 59)),
+            '亥': (datetime.time(21, 0), datetime.time(22, 59))}
+
+ustya = {'gb34': (datetime.time(23, 0), datetime.time(0, 59)),
+            'liv8': (datetime.time(1, 0), datetime.time(2, 59)),
+            'lu5': (datetime.time(3, 0), datetime.time(4, 59)),
+            'co11': (datetime.time(5, 0), datetime.time(6, 59)),
+            'st36': (datetime.time(7, 0), datetime.time(8, 59)),
+            'sp9': (datetime.time(9, 0), datetime.time(10, 59)),
+            'ht3': (datetime.time(11, 0), datetime.time(12, 59)),
+            'si8': (datetime.time(13, 0), datetime.time(14, 59)),
+            'bl40': (datetime.time(15, 0), datetime.time(16, 59)),
+            'kid10': (datetime.time(17, 0), datetime.time(18, 59)),
+            'hg3': (datetime.time(19, 0), datetime.time(20, 59)),
+            'th10': (datetime.time(21, 0), datetime.time(22, 59))}
+
+points_of_space = {
+    '乙':{
+        'change_day': datetime.time(17, 0),
+        
+    }
+}

@@ -259,6 +259,9 @@ label {
 .is-invalid {
     border-color: #dc3545 !important;
 }
+.is-invalid {
+    border-color: #588ed4 !important;
+}
 
 
 .premium-content {
