@@ -116,7 +116,7 @@ def get_taiyan(our_date, day_iero, CURRENT_TIME_SOLAR, headOfT, timeOfT):
         <div class='container'>
             {get_tayan_pair(current_row)}
         </div>
-        <div class=".scrollable-table;" style="height: 300px; overflow: auto;">
+        <div class=".scrollable-table;" style="height: 500px; overflow: auto;">
             <div style="margin: auto 10px;" >
                 <table>
                     {row_tab}

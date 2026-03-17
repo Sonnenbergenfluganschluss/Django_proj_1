@@ -30,7 +30,7 @@ def process_method(request):
             method_index = int(data.get('methodIndex'))
             methods = [" ", "ЛУННЫЕ ДВОРЦЫ", "ФЭЙ ТЭН БА ФА", 
                       "ЛИН ГУЙ БА ФА", "ТАЙ ЯН БА ФА", 
-                      "ДА СЯО ЧЖОУ ТЯНЬ ЖЭНЬ ФА", "Открытые точки структуры небесных стволов"]
+                      "ДА СЯО ЧЖОУ ТЯНЬ ЖЭНЬ ФА", "Дополнительные методы выбора точек"]
             selected_method = methods[method_index]
             request.session['current_method'] = selected_method
 
@@ -85,7 +85,7 @@ def process_method(request):
                 elif method=="ДА СЯО ЧЖОУ ТЯНЬ ЖЭНЬ ФА":
                     return get_dasyao(current_hour_china, headOfT, timeOfT)
                 
-                elif method=="Открытые точки структуры небесных стволов":
+                elif method=="Дополнительные методы выбора точек":
                     return get_additional_points(day_iero, CURRENT_TIME_SOLAR)
                 
                 
