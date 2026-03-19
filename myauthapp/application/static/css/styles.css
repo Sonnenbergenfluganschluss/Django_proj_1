@@ -259,9 +259,6 @@ label {
 .is-invalid {
     border-color: #dc3545 !important;
 }
-.is-invalid {
-    border-color: #588ed4 !important;
-}
 
 
 .premium-content {
@@ -278,4 +275,9 @@ label {
 }
 .full-access .blur-overlay {
     display: none;
+}
+
+
+.color_tuning {
+    border-color: #4a78b6 !important;
 }

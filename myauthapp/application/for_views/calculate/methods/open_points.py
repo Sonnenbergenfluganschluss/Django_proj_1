@@ -47,7 +47,7 @@ def get_additional_points(day_iero, solartime):
                     last_time = last_datetime - datetime.timedelta(minutes=27, seconds=0)
                     last_28_minutes_slot = (last_time.strftime('%H:%M'), v[1].strftime('%H:%M'))
 
-
+    color_point = "#4a78b6"
             
     result = f'''
             <div class=container>
@@ -55,9 +55,9 @@ def get_additional_points(day_iero, solartime):
                 <div class=container style=padding:20px;>
                     <div> 
                         На текущий момент, с {current_time_slot[0]} до {current_time_slot[1]}, 
-                        открыты точки: <span style='color:#588ed4; font-weight: bold;'>{current_point}</span>. 
+                        открыты точки: <span style='color:{color_point}; font-weight: bold;'>{current_point}</span>. 
                         <br>Следующий временной промежуток с {time_slot[0]} до {time_slot[1]}, 
-                        открыты точки: <span style='color:#588ed4; font-weight: bold;'>{next_point}</span>. 
+                        открыты точки: <span style='color:{color_point}; font-weight: bold;'>{next_point}</span>. 
                     </div>
                 </div>
             </div>
@@ -66,13 +66,13 @@ def get_additional_points(day_iero, solartime):
                 <div class=container style=padding:20px;>
                     <div> 
                         1. Последовательно одной иглой соединяем точки: 
-                        <span style='color:#588ed4; font-weight: bold;'>Cv4</span>, 
-                        <span style='color:#588ed4; font-weight: bold;'>Cv5</span>, 
-                        <span style='color:#588ed4; font-weight: bold;'>Cv6</span>. <br>
-                        2. Вспомогательная точка - <span style='color:#588ed4; font-weight: bold;'>Kid16</span> 
+                        <span style='color:{color_point}; font-weight: bold;'>Cv4</span>, 
+                        <span style='color:{color_point}; font-weight: bold;'>Cv5</span>, 
+                        <span style='color:{color_point}; font-weight: bold;'>Cv6</span>. <br>
+                        2. Вспомогательная точка - <span style='color:{color_point}; font-weight: bold;'>Kid16</span> 
                         ставится билатерально. <br>
                         3. <span style='font-weight: bold;'>Перед извлечением игл</span> стимулируем точку-устье канала согласно времени: <br>
-                        c {current_slot[0]} до {current_slot[1]} - точка <span style='color:#588ed4; font-weight: bold;'>{cur_point}</span>. 
+                        c {current_slot[0]} до {current_slot[1]} - точка <span style='color:{color_point}; font-weight: bold;'>{cur_point}</span>. 
                     </div>
                 </div>
             </div>
@@ -81,9 +81,9 @@ def get_additional_points(day_iero, solartime):
                 <div class=container style=padding:20px;>
                     <div> 
                         Небесный ствол дня сегодня: <span style='color: {color_dict[day_iero[0]]}; font-weight: bold;'>{day_iero[0]}</span> <br>
-                        Точки времени: <span style='color:#588ed4; font-weight: bold;'>{point_of_time}</span>. <br>
-                        Точки пространства: <span style='color:#588ed4; font-weight: bold;'>{points_of_space}</span>. <br>
-                        Точки последних 28 минут стража <span style='color:#588ed4; font-weight: bold;'>{point_of_last_28_minutes}</span>, активны с {last_28_minutes_slot[0]} по {last_28_minutes_slot[1]}: . <br>
+                        Точки времени: <span style='color:{color_point}; font-weight: bold;'>{point_of_time}</span>. <br>
+                        Точки пространства: <span style='color:{color_point}; font-weight: bold;'>{points_of_space}</span>. <br>
+                        Точки последних 28 минут стража <span style='color:{color_point}; font-weight: bold;'>{point_of_last_28_minutes}</span>, активны с {last_28_minutes_slot[0]} по {last_28_minutes_slot[1]}: . <br>
                     </div>
                 </div>
             </div>
