@@ -21,9 +21,9 @@ def get_additional_points(day_iero, solartime):
         if v[0] <= current_time < v[1]:
             current_slot = [v[0].strftime('%H:%M'), v[1].strftime('%H:%M')]
             cur_point = k.capitalize()
-        if v[0] <= next_time.time() < v[1]:
-            next_point = k.capitalize()
-            time_slot = [v[0].strftime('%H:%M'), v[1].strftime('%H:%M')]    
+        # if v[0] <= next_time.time() < v[1]:
+        #     next_time_point = k.capitalize()
+        #     next_time_slot = [v[0].strftime('%H:%M'), v[1].strftime('%H:%M')]    
 
     # Поиск точек Najafa
     for k, v in najafa.items():
