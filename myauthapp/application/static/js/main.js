@@ -5,7 +5,8 @@ document.addEventListener('DOMContentLoaded', function() {
         birthdayData: null,
         cityData: null,
         ourDateData: null,
-        needed_channel: null,
+        needed_channel1: null,
+        needed_channel2: null,
     };
     // Инициализация элементов UI
     const uiElements = initUIElements();

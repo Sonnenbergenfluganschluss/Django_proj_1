@@ -109,17 +109,37 @@
                     <div class="container">
                         <form id="predictionForm">
                             {% csrf_token %}
-                            <div class="row">
-                                <div class="col-md-3">
-                                    <label for="needed_channel" class="form-label">Канал:</label>
-                                    <select class="form-select" id="needed_channel" name="needed_channel" style="width: 100%;
-                                                    border: none;
+                            
+                            <div class="grid">
+                                <div class="box">
+                                    <label for="needed_channel1" class="form-label">Канал 1:</label>
+                                    <select class="form-select" id="needed_channel1" name="needed_channel1" style="border: none;
                                                     background-color: #eeeeee;
                                                     border-radius: 10px;
                                                     text-align: center; 
                                                     height: 40px; 
                                                     font-size: 16px;
-                                                "required>
+                                                    " required>
+                                        <option value="Ду-май">Ду-май</option>
+                                        <option value="Чонг-май">Чонг-май</option>
+                                        <option value="Инь-цяо">Инь-цяо</option>
+                                        <option value="Ян-вэй">Ян-вэй</option>
+                                        <option value="Жень-май">Жень-май</option>
+                                        <option value="Дай-май" selected>Дай-май</option>
+                                        <option value="Ян-цяо">Ян-цяо</option>
+                                        <option value="Инь-вэй">Инь-вэй</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="box">
+                                    <label for="needed_channel2" class="form-label">Канал 2:</label>
+                                    <select class="form-select" id="needed_channel2" name="needed_channel2" style="border: none;
+                                                    background-color: #eeeeee;
+                                                    border-radius: 10px;
+                                                    text-align: center; 
+                                                    height: 40px; 
+                                                    font-size: 16px;
+                                                    " required>
                                         <option value="Ду-май">Ду-май</option>
                                         <option value="Чонг-май">Чонг-май</option>
                                         <option value="Инь-цяо">Инь-цяо</option>
@@ -131,10 +151,10 @@
                                     </select>
                                 </div>
                             </div>
+                            
                             <div class="container">
                                 <button type="submit" class="button" id="submitBtn">
-                                    <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-                                    Enter
+                                    Рассчитать
                                 </button>
                             </div>
                         </form>
@@ -235,6 +255,14 @@
         background-color: var(--primary-color);
         color: white;
 
+    }
+
+    .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* две колонки одинаковой ширины */
+    }
+    .box {
+        padding: 5px;
     }
 </style>
 

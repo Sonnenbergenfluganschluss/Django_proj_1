@@ -5,7 +5,8 @@ document.addEventListener('DOMContentLoaded', function() {
         birthdayData: null,
         cityData: null,
         ourDateData: null,
-        needed_channel: null,
+        needed_channel1: null,
+        needed_channel2: null,
     };
     // Инициализация элементов UI
     const uiElements = initUIElements();
@@ -416,10 +417,15 @@ document.addEventListener('DOMContentLoaded', function() {
         predictionForm.addEventListener('submit', function(e) {
             e.preventDefault();
             
-            const needed_сhannel = document.getElementById('needed_channel').value;
+            const needed_сhannel1 = document.getElementById('needed_channel1').value;
+            const needed_сhannel2 = document.getElementById('needed_channel2').value;
             
-            if (!needed_сhannel) {
-                luoTaiyanResult.innerHTML = '<div class="alert alert-warning">Пожалуйста, выберите канал</div>';
+            if (!needed_сhannel1) {
+                luoTaiyanResult.innerHTML = "<div class='alert alert-warning'>Пожалуйста, выберите канал</div>";
+                return;
+            }
+            if (!needed_сhannel2) {
+                luoTaiyanResult.innerHTML = "<div class='alert alert-warning'>Пожалуйста, выберите канал</div>";
                 return;
             }
             
@@ -434,7 +440,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     'X-CSRFToken': '{{ csrf_token }}'
                 },
                 body: JSON.stringify({
-                    needed_channel: needed_сhannel
+                    needed_channel1: needed_сhannel1,
+                    needed_channel2: needed_сhannel2
                 })
             })
             .then(response => response.json())

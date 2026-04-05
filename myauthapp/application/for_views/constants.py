@@ -36,6 +36,7 @@ woman = ["Gb.41", "Gb.44", "Gb.34", "Gb.37/Liv.3", "Liv.5/Gb.40", "Gb.38", "Gb.4
     "Si.3", "Si.1", "Si.8", "Si.7/Ht.7/Hg.7", "Ht.5/Hg.6/Si.4", "Si.5", "Si.2"]
 
 
+
 orange = '#ad5c0a'
 
 color_dict = {'甲':'green', '乙':'green', '丙':'red', '丁':'red', '戊':f'{orange}', '己':f'{orange}', '庚':'grey', '辛':'grey', '壬':'blue', '癸':'blue',

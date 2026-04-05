@@ -8,12 +8,12 @@ import pandas as pd
 current_row_global = ""
 current_channel_global = ""
 
-def get_luo_taiyan(current_channel, needed_channel):
-    if len(current_channel) > 0:
+def get_luo_taiyan(needed_channel1, needed_channel2):
+    if len(needed_channel1) > 0 and len(needed_channel2) > 0:
         try:
             df = pd.read_csv(f'{settings.BASE_DIR}/data/luo_taiyan.csv', index_col='Unnamed: 0')
-            result = df.loc[current_channel.lower(), needed_channel.lower()]
-            return f"<div class='container'>Связь {current_channel} с каналом {needed_channel} через Luo-точки: {result}</div>"
+            result = df.loc[needed_channel1.lower(), needed_channel2.lower()]
+            return f"<div class='container'>Связь {needed_channel1} с каналом {needed_channel2} через Luo-точки: {result}</div>"
         except Exception as e:
             return f"<div class='container'>Ошибка при получении Luo-точек: {str(e)}</div>"
     return "<div class='container'>Нет данных для расчета Luo-точек</div>"

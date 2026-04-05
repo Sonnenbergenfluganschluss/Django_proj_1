@@ -13,10 +13,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 luoTaiyanResult.innerHTML = "<div class='alert alert-warning'>Пожалуйста, выберите канал</div>";
                 return;
             }
-            if (!needed_сhannel2) {
-                luoTaiyanResult.innerHTML = "<div class='alert alert-warning'>Пожалуйста, выберите канал</div>";
-                return;
-            }
+            // if (!needed_сhannel2) {
+            //     luoTaiyanResult.innerHTML = "<div class='alert alert-warning'>Пожалуйста, выберите канал</div>";
+            //     return;
+            // }
             
             // Показываем индикатор загрузки
             luoTaiyanResult.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"><span class="sr-only">Loading...</span></div></div>';
