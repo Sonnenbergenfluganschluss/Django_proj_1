@@ -5,13 +5,14 @@
 
 {% block header %}
     Калькулятор хронопунктуры
-    <script src="{% static 'js/modules/utils.js' %}"></script>
+    <!-- <script src="{% static 'js/modules/utils.js' %}"></script>
     <script src="{% static 'js/modules/dateHandling.js' %}"></script>
     <script src="{% static 'js/modules/dataProcessors.js' %}"></script>
     <script src="{% static 'js/modules/eventHandlers.js' %}"></script>
     <script src="{% static 'js/modules/cityAutocomplete.js' %}"></script>
     <script src="{% static 'js/modules/get_luo_taiyan.js' %}"></script>
-    <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/main.js' %}"></script> -->
+    <script src="{% static 'js/script.js' %}"></script> 
 {% endblock %}
     
 {% block content %}
@@ -19,6 +20,10 @@
 <div class="container">  
     <section class="my-5">
         <p>Сегодня: <strong>{{ current_date_show }}</strong></p>
+        <div class="real-time-clock">
+            <span>Текущее административное время: </span>
+            <span id="realTimeClock"></span>
+        </div>
         
         {% if user.username != 'Анастасия' %}
         <!-- Форма для даты -->

@@ -15,6 +15,9 @@ def get_additional_points(day_iero, solartime):
         if v[0] <= next_time.time() < v[1]:
             next_point = k.capitalize()
             time_slot = [v[0].strftime('%H:%M'), v[1].strftime('%H:%M')]
+        else:
+            next_point = '-'
+            time_slot = ['-', '-']
             
     # Поиск для 'Метод укрепления изначального Ян':
     for k, v in ustya.items():

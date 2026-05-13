@@ -156,7 +156,8 @@ storage_time = {'子': (datetime.time(23, 0), datetime.time(0, 59)),
                 '戌': (datetime.time(19, 0), datetime.time(20, 59)),
                 '亥': (datetime.time(21, 0), datetime.time(22, 59))}
 
-ustya = {'gb34': (datetime.time(23, 0), datetime.time(0, 59)),
+ustya = {'gb34': (datetime.time(23, 0), datetime.time(23, 59)),
+            'gb34.': (datetime.time(0, 0), datetime.time(0, 59)),
             'liv8': (datetime.time(1, 0), datetime.time(2, 59)),
             'lu5': (datetime.time(3, 0), datetime.time(4, 59)),
             'co11': (datetime.time(5, 0), datetime.time(6, 59)),

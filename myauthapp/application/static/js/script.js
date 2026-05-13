@@ -8,12 +8,17 @@ document.addEventListener('DOMContentLoaded', function() {
         needed_channel1: null,
         needed_channel2: null,
     };
+    
     // Инициализация элементов UI
     const uiElements = initUIElements();
     
     // Инициализация всех модулей
     initCityAutocomplete(uiElements);
     setupEventListeners(uiElements);
+    
+    // Инициализация реального времени и периодических обновлений
+    initRealTimeClock(); // Добавьте этот элемент в ваш HTML
+    initPeriodicUpdates(uiElements); // Периодическое обновление данных
 });
 
 function initUIElements() {
@@ -360,29 +365,6 @@ function setupMethodHandlers(ui) {
 }
 
 
-// function handleTimeChange(ui) {
-//         if (ui.changeTimeCheckbox) {
-//                 ui.changeTimeCheckbox.addEventListener('change', function() {
-//                         if (window.calculationState && window.calculationState.cityData) {
-//                                 window.calculationState.cityData.current_time = this.checked 
-//                                     ? window.calculationState.cityData.admin_time 
-//                     : window.calculationState.cityData.solar_time;
-
-//                 updateCityUI(ui, window.calculationState.cityData);
-
-//                 if (window.calculationState.ourDateData) {
-//                     processOurDateData(ui).then(() => {
-//                             if (ui.methodSelect && ui.methodSelect.value !== " ") {
-//                             processMethodData(ui);
-//                         }
-//                     });
-//                 }
-//             }
-//         });
-//     }
-// }  
-
-
 function setupTimeCheckboxHandler(ui) {
     if (ui.changeTimeCheckbox) {
         ui.changeTimeCheckbox.addEventListener('change', function() {
@@ -484,5 +466,170 @@ function recalculateMethodIfNeeded(ui) {
         
         console.log('Автоматический пересчет метода из-за изменения данных...');
         processMethodData(ui);
+    }
+}
+
+// ----------------------------------------------------------------------------------------------------- //
+// ----------------------------------------------------------------------------------------------------- //
+// ----------------------------------------------------------------------------------------------------- //
+// ----------------------------------------------------------------------------------------------------- //
+// ----------------------------------------------------------------------------------------------------- //
+// ----------------------------------------------------------------------------------------------------- //
+// ----------------------------------------------------------------------------------------------------- //
+// ----------------------------------------------------------------------------------------------------- //
+// ----------------------------------------------------------------------------------------------------- //
+// ----------------------------------------------------------------------------------------------------- //
+// ----------------------------------------------------------------------------------------------------- //
+// ----------------------------------------------------------------------------------------------------- //
+// ----------------------------------------------------------------------------------------------------- //
+// ----------------------------------------------------------------------------------------------------- //
+
+// --- ФУНКЦИЯ ОБНОВЛЕНИЯ ЧАСОВ В РЕАЛЬНОМ ВРЕМЕНИ ---
+function initRealTimeClock() {
+    const clockElement = document.getElementById('realTimeClock'); // Добавьте этот элемент в HTML
+    if (!clockElement) return;
+    
+    function updateClock() {
+        const now = new Date();
+        const options = {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+        };
+        clockElement.textContent = now.toLocaleString('ru-RU', options);
+    }
+    
+    updateClock(); // Первоначальное обновление
+    setInterval(updateClock, 1000); // Обновляем каждую секунду
+}
+
+// --- ФУНКЦИЯ ПЕРИОДИЧЕСКОГО ОБНОВЛЕНИЯ ДАННЫХ ---
+function initPeriodicUpdates(uiElements) {
+    // Обновляем данные каждую минуту (60000 мс)
+    setInterval(async () => {
+        console.log('Периодическое обновление данных...');
+        
+        // Обновляем данные города, если он выбран
+        if (window.calculationState.cityData && uiElements.citySearch.value) {
+            await refreshCityData(uiElements);
+        }
+        
+        // Обновляем данные даты, если они есть
+        if (window.calculationState.ourDateData && uiElements.ourdateInput.value) {
+            await refreshOurDateData(uiElements);
+        }
+        
+        // Обновляем метод, если он выбран
+        if (window.calculationState.methodData && uiElements.methodSelect.value !== " ") {
+            await refreshMethodData(uiElements);
+        }
+        
+    }, 60000); // 60000 мс = 1 минута
+}
+
+// --- ОБНОВЛЕНИЕ ДАННЫХ ГОРОДА ---
+async function refreshCityData(ui) {
+    const city = ui.citySearch.value;
+    if (!city) return;
+    
+    try {
+        const response = await fetch(window.processCityUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': window.csrfToken },
+            body: JSON.stringify({ city })
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            // Сохраняем состояние чекбокса перед обновлением
+            const wasChecked = ui.changeTimeCheckbox.checked;
+            
+            window.calculationState.cityData = data;
+            
+            // Восстанавливаем настройку времени
+            if (wasChecked) {
+                data.current_time = data.admin_time;
+            } else {
+                data.current_time = data.solar_time;
+            }
+            
+            updateCityUI(ui, data);
+            
+            // Обновляем чекбокс
+            ui.changeTimeCheckbox.checked = wasChecked;
+            
+            console.log('Данные города обновлены');
+        }
+    } catch (error) {
+        console.error('Ошибка при обновлении данных города:', error);
+    }
+}
+
+// --- ОБНОВЛЕНИЕ ДАННЫХ ДАТЫ ---
+async function refreshOurDateData(ui) {
+    const ourdate = ui.ourdateInput.value;
+    if (!ourdate || !window.calculationState.cityData) return;
+    
+    if (!ourdate.match(/^\d{4}-\d{2}-\d{2}$/)) return;
+    
+    const postData = {
+        ourdate: ourdate,
+        current_time: window.calculationState.cityData.current_time
+    };
+    
+    try {
+        const response = await fetch(window.processOurDateUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': window.csrfToken },
+            body: JSON.stringify(postData)
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            window.calculationState.ourDateData = data;
+            ui.ourdateResult.innerHTML = `<p>${data.our_date_table}</p><p>${data.str_result}</p>`;
+            console.log('Данные даты обновлены');
+        }
+    } catch (error) {
+        console.error('Ошибка при обновлении данных даты:', error);
+    }
+}
+
+// --- ОБНОВЛЕНИЕ ДАННЫХ МЕТОДА ---
+async function refreshMethodData(ui) {
+    const methodIndex = ui.methodSelect.value;
+    if (methodIndex === " " || !window.calculationState.ourDateData || !window.calculationState.cityData) return;
+    
+    const postData = {
+        methodIndex: methodIndex,
+        our_date: window.calculationState.ourDateData.our_date_result,
+        day_iero: window.calculationState.ourDateData.day_iero,
+        current_time: window.calculationState.cityData.current_time
+    };
+    
+    try {
+        const response = await fetch(window.processMethodUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': window.csrfToken },
+            body: JSON.stringify(postData)
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            window.calculationState.methodData = data;
+            ui.methodResult.innerHTML = `
+                <div>
+                    <div>${data.result}</div>
+                </div>
+            `;
+            console.log('Данные метода обновлены');
+        }
+    } catch (error) {
+        console.error('Ошибка при обновлении данных метода:', error);
     }
 }
