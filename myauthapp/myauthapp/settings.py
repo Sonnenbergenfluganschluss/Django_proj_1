@@ -131,7 +131,7 @@ USE_TZ = True
 
 
 if DEBUG:
-    STATIC_URL = 'myauthapp/accounts/static/'
+    STATIC_URL = 'myauthapp/staticfiles/static/'
     STATICFILES_DIRS = [
     #    BASE_DIR / "accounts",
        BASE_DIR / "payments",
