@@ -10,7 +10,6 @@ DEBUG = True
 env_path = BASE_DIR / '.env'
 load_dotenv(env_path)
 
-# SECRET_KEY = os.environ.get('SECRET_KEY')
 SECRET_KEY='django-insecure-m3%!16-+$j*%-!n6l=s3id^oo_qfsm^sx#=eo#s_9fz6^xdiib'
 
 
@@ -36,8 +35,6 @@ ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL')
 
 
 ALLOWED_HOSTS = []
-# CSRF_TRUSTED_ORIGINS = [] #["https://хронопунктура.рф", "https://xn--80atiadbhegtidq.xn--p1ai"]
-
 
 # Application definition
 
@@ -93,17 +90,6 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
-    # "default": {
-    #     "ENGINE": "django.db.backends.mysql",
-    #     "NAME": os.environ.get('DB_NAME'),
-    #     "USER": os.environ.get('DB_USER'),
-    #     "PASSWORD": os.environ.get('DB_PASSWORD'),
-    #     "OPTIONS": {
-    #         "ssl": False,
-    #         "init_command": "SET sql_mode='STRICT_TRANS_TABLES'; SET default_storage_engine=INNODB",
-    #         "unix_socket": '/var/run/mysql8-container/mysqld.sock',
-    #     },
-    # }
 }
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -133,11 +119,9 @@ USE_TZ = True
 if DEBUG:
     STATIC_URL = 'myauthapp/staticfiles/static/'
     STATICFILES_DIRS = [
-    #    BASE_DIR / "accounts",
-       BASE_DIR / "payments",
-       BASE_DIR / "week_prediction",
-       BASE_DIR / "application",
+        os.path.join(BASE_DIR, 'static'),
     ]
+
 else:
     STATIC_URL = 'myauthapp/staticfiles/static/'
     STATIC_ROOT = BASE_DIR / 'staticfiles'
@@ -148,12 +132,6 @@ LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'login'
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
-
-
-#CSRF_COOKIE_HTTPONLY = False
-#CSRF_USE_SESSIONS = False
-#CSRF_COOKIE_SECURE = False
-#SESSION_COOKIE_SECURE = True
 
 
 YOOKASSA_SHOP_ID = '1127478'  
