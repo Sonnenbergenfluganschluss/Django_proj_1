@@ -1,4 +1,4 @@
-('C:\\Users\\anast\\Desktop\\SF\\IDE\\hronopunktura\\build\\launcher\\PYZ-00.pyz',
+('C:\\Users\\anast\\Desktop\\SF\\IDE\\hronopunktura\\myauthapp\\build\\launcher\\PYZ-00.pyz',
  [('_compat_pickle',
    'C:\\Users\\anast\\AppData\\Local\\Programs\\Python\\Python39\\lib\\_compat_pickle.py',
    'PYMODULE'),

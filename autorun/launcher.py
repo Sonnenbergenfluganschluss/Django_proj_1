@@ -11,7 +11,7 @@ from tkinter import messagebox
 class DjangoLauncher:
     def __init__(self):
         # Путь к проекту (можно указать в настройках)
-        self.project_path = r"C:/Users/anast/Documents/hronopunktura/myauthapp"
+        self.project_path = r"C:/hronopunktura/myauthapp"
         self.port = 8000
         self.process = None
         
